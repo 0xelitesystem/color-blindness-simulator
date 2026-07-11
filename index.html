@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Blindness Simulator</title>
+<meta name="description" content="Preview how images and colors look under protanopia, deuteranopia, tritanopia, and achromatopsia. Runs on a canvas in your browser. Nothing is uploaded.">
+<link rel="canonical" href="https://0xelitesystem.github.io/color-blindness-simulator/">
+<meta property="og:title" content="Color Blindness Simulator">
+<meta property="og:description" content="Preview images and colors under common color-vision deficiencies, side by side, all in your browser. Nothing is uploaded.">
+<meta property="og:url" content="https://0xelitesystem.github.io/color-blindness-simulator/">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Color Blindness Simulator","applicationCategory":"DeveloperApplication","operatingSystem":"Any (browser)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://0xelitesystem.github.io/color-blindness-simulator/","author":{"@type":"Person","name":"0xelitesystem","url":"https://elitesystem.ai"}}
+</script>
+<style>
+:root {
+  --bg: #fafaf6;
+  --surface: #ffffff;
+  --ink: #0a1d1e;
+  --ink-soft: #2c4a4c;
+  --rule: #c8d4d3;
+  --teal: #0f5c60;
+  --teal-deep: #0a4548;
+  --gold: #b07d2a;
+  --gold-deep: #8a611f;
+  --ok: #1a5c2e;
+  --warn: #8a5a00;
+  --err: #8b1a1a;
+  --code-bg: #f0ebe1;
+}
+[data-theme="dark"] {
+  --bg: #0c1c1d;
+  --surface: #14292a;
+  --ink: #e8ebe6;
+  --ink-soft: #b0c0bd;
+  --rule: #2a4042;
+  --teal: #4ab4ba;
+  --teal-deep: #6dc8ce;
+  --gold: #d4a155;
+  --gold-deep: #e6b876;
+  --ok: #6dd380;
+  --warn: #d4a155;
+  --err: #e88080;
+  --code-bg: #0a1718;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  line-height: 1.55;
+}
+.wrap { max-width: 1100px; margin: 0 auto; }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 2px solid var(--teal);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--teal);
+}
+.tag {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.75rem;
+  color: var(--gold-deep);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .tag { color: var(--gold); }
+.theme-btn {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.theme-btn:hover { border-color: var(--teal); color: var(--teal); }
+.lede {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  margin-bottom: 1.75rem;
+  max-width: 62ch;
+}
+.input-box {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.25rem;
+  margin-bottom: 1.75rem;
+  border-radius: 3px;
+}
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.mode-tab {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 2px;
+}
+.mode-tab.active { background: var(--teal); border-color: var(--teal); color: var(--surface); font-weight: 600; }
+[data-theme="dark"] .mode-tab.active { color: var(--bg); }
+.drop-zone {
+  border: 2px dashed var(--rule);
+  border-radius: 3px;
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: var(--code-bg);
+}
+.drop-zone:hover { border-color: var(--teal); }
+.drop-zone.drag { border-color: var(--teal); background: var(--surface); }
+.drop-zone strong { color: var(--teal); font-weight: 600; }
+.drop-hint { font-family: ui-monospace, SFMono-Regular, monospace; font-size: 0.75rem; margin-top: 0.6rem; }
+textarea {
+  width: 100%;
+  min-height: 90px;
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 0.85rem;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  resize: vertical;
+  border-radius: 2px;
+}
+textarea:focus { outline: 2px solid var(--teal); outline-offset: 1px; }
+.hint-text { font-size: 0.78rem; color: var(--ink-soft); margin-top: 0.5rem; }
+.input-row { display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+button:hover { border-color: var(--teal); }
+button.primary { background: var(--teal); border-color: var(--teal); color: var(--surface); font-weight: 600; }
+[data-theme="dark"] button.primary { color: var(--bg) !important; }
+button.primary:hover { background: var(--teal-deep); border-color: var(--teal-deep); }
+.hidden { display: none; }
+.privacy-note { font-size: 0.78rem; color: var(--gold-deep); margin-top: 0.85rem; }
+[data-theme="dark"] .privacy-note { color: var(--gold); }
+.results { display: none; }
+.results.show { display: block; }
+.sim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+.sim-card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1rem;
+}
+.sim-card h3 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 0.25rem;
+}
+.sim-card .sim-desc { font-size: 0.75rem; color: var(--ink-soft); margin-bottom: 0.75rem; }
+.sim-card canvas { width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 2px; display: block; }
+.color-strip { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
+.color-cell {
+  flex: 1 1 40px;
+  min-width: 40px;
+  height: 46px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.color-cell span {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.6rem;
+  padding: 1px 2px;
+  background: rgba(255,255,255,0.82);
+  color: #111;
+  border-radius: 2px 2px 0 0;
+}
+.error-msg {
+  color: var(--err);
+  font-size: 0.85rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem;
+  background: var(--code-bg);
+  border-left: 3px solid var(--err);
+  border-radius: 2px;
+}
+footer {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+footer a { color: var(--teal); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+@media (max-width: 640px) {
+  body { padding: 1rem 0.75rem; }
+  h1 { font-size: 1.4rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Color Blindness Simulator</h1>
+    <div class="tag">Preview color-vision deficiencies</div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" type="button">Dark</button>
+</header>
+
+<p class="lede">See how an image or a set of colors reads under the common color-vision deficiencies: protanopia, deuteranopia, tritanopia, and achromatopsia. Everything runs on a canvas in this page. Nothing is uploaded.</p>
+
+<div class="input-box">
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-image" type="button">Image</button>
+    <button class="mode-tab" id="tab-colors" type="button">Colors</button>
+  </div>
+
+  <div id="image-panel">
+    <label>Image</label>
+    <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Upload an image">
+      <div><strong>Drop an image here</strong> or click to choose a file</div>
+      <div class="drop-hint">PNG, JPG, WEBP, GIF, or any format your browser can render</div>
+    </div>
+    <input type="file" id="file-input" accept="image/*" hidden>
+  </div>
+
+  <div id="colors-panel" class="hidden">
+    <label for="colors-input">Colors (one per line, or comma separated)</label>
+    <textarea id="colors-input" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="#0f5c60&#10;#b07d2a&#10;rgb(220, 40, 40)&#10;teal"></textarea>
+    <div class="hint-text">Accepts hex (#rgb or #rrggbb), rgb(...), or CSS color names.</div>
+    <div class="input-row">
+      <button class="primary" id="simulate-btn" type="button">Simulate</button>
+      <button id="sample-btn" type="button">Load sample</button>
+    </div>
+  </div>
+
+  <div class="privacy-note">All processing happens locally on a canvas. Images and colors never leave your browser.</div>
+</div>
+
+<div id="error-box"></div>
+
+<div class="results" id="results">
+  <div class="sim-grid" id="sim-grid"></div>
+</div>
+
+<footer>
+  <div>Color Blindness Simulator. Open source, MIT licensed. <a href="https://github.com/0xelitesystem/color-blindness-simulator" target="_blank" rel="noopener">View source</a>.</div>
+  <div>Brettel/Vienot style transform matrices.</div>
+</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+// Theme
+const themeBtn = $("theme-toggle");
+function setTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
+}
+themeBtn.addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  setTheme(cur === "dark" ? "light" : "dark");
+});
+const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+setTheme(prefersDark ? "dark" : "light");
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function showError(msg) { $("error-box").innerHTML = `<div class="error-msg">${escapeHtml(msg)}</div>`; }
+function clearError() { $("error-box").innerHTML = ""; }
+
+// Color-vision deficiency simulation matrices, applied in linear-ish sRGB space.
+// Protanopia, deuteranopia, tritanopia matrices are the commonly cited
+// Machado/Vienot style approximations. Achromatopsia uses luminance weights.
+const CVD = {
+  normal: {
+    label: "Normal vision",
+    desc: "The original, unmodified colors.",
+    m: [1,0,0, 0,1,0, 0,0,1]
+  },
+  protanopia: {
+    label: "Protanopia",
+    desc: "Missing long-wavelength (red) cones.",
+    m: [0.567,0.433,0.000, 0.558,0.442,0.000, 0.000,0.242,0.758]
+  },
+  deuteranopia: {
+    label: "Deuteranopia",
+    desc: "Missing medium-wavelength (green) cones.",
+    m: [0.625,0.375,0.000, 0.700,0.300,0.000, 0.000,0.300,0.700]
+  },
+  tritanopia: {
+    label: "Tritanopia",
+    desc: "Missing short-wavelength (blue) cones.",
+    m: [0.950,0.050,0.000, 0.000,0.433,0.567, 0.000,0.475,0.525]
+  },
+  achromatopsia: {
+    label: "Achromatopsia",
+    desc: "No color vision, grayscale by luminance.",
+    m: [0.299,0.587,0.114, 0.299,0.587,0.114, 0.299,0.587,0.114]
+  }
+};
+const ORDER = ["normal", "protanopia", "deuteranopia", "tritanopia", "achromatopsia"];
+
+function clamp255(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
+
+function applyMatrix(r, g, b, m) {
+  return [
+    clamp255(Math.round(r * m[0] + g * m[1] + b * m[2])),
+    clamp255(Math.round(r * m[3] + g * m[4] + b * m[5])),
+    clamp255(Math.round(r * m[6] + g * m[7] + b * m[8]))
+  ];
+}
+
+function transformImageData(srcData, m) {
+  const out = new Uint8ClampedArray(srcData.length);
+  for (let i = 0; i < srcData.length; i += 4) {
+    const [r, g, b] = applyMatrix(srcData[i], srcData[i + 1], srcData[i + 2], m);
+    out[i] = r; out[i + 1] = g; out[i + 2] = b; out[i + 3] = srcData[i + 3];
+  }
+  return out;
+}
+
+// ----- Image mode -----
+let sourceImageData = null;
+let sourceW = 0, sourceH = 0;
+
+function simulateImage(img) {
+  clearError();
+  const canvas = document.createElement("canvas");
+  const maxDim = 480;
+  let w = img.naturalWidth, h = img.naturalHeight;
+  if (!w || !h) { showError("Image has no dimensions."); return; }
+  const scale = Math.min(1, maxDim / Math.max(w, h));
+  w = Math.max(1, Math.round(w * scale));
+  h = Math.max(1, Math.round(h * scale));
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, w, h);
+  let imgData;
+  try { imgData = ctx.getImageData(0, 0, w, h); }
+  catch (e) { showError("Could not read image pixels."); return; }
+  sourceImageData = imgData.data;
+  sourceW = w; sourceH = h;
+
+  const grid = $("sim-grid");
+  grid.innerHTML = "";
+  ORDER.forEach((key) => {
+    const cfg = CVD[key];
+    const card = document.createElement("div");
+    card.className = "sim-card";
+    const title = document.createElement("h3");
+    title.textContent = cfg.label;
+    const desc = document.createElement("div");
+    desc.className = "sim-desc";
+    desc.textContent = cfg.desc;
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    const cctx = c.getContext("2d");
+    const transformed = transformImageData(sourceImageData, cfg.m);
+    cctx.putImageData(new ImageData(transformed, w, h), 0, 0);
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(c);
+    grid.appendChild(card);
+  });
+  $("results").classList.add("show");
+}
+
+// ----- Color mode -----
+function parseColors(text) {
+  const tokens = text.split(/[\n,]+/).map(t => t.trim()).filter(Boolean);
+  const result = [];
+  const probe = document.createElement("canvas").getContext("2d");
+  for (const tok of tokens) {
+    // Use the canvas to resolve any valid CSS color to rgba.
+    probe.fillStyle = "#000";
+    probe.fillStyle = tok;
+    const resolved = probe.fillStyle;
+    // If parsing failed, fillStyle stays at previous value; detect by re-check.
+    probe.fillStyle = "#010203";
+    probe.fillStyle = tok;
+    if (probe.fillStyle === "#010203" && resolved !== "#010203") {
+      // ambiguous, skip
+    }
+    const rgb = cssToRgb(tok);
+    if (rgb) result.push({ input: tok, rgb });
+  }
+  return result;
+}
+
+function cssToRgb(str) {
+  const probe = document.createElement("canvas").getContext("2d");
+  probe.fillStyle = "#000000";
+  probe.fillStyle = str;
+  const a = probe.fillStyle;
+  probe.fillStyle = "#ffffff";
+  probe.fillStyle = str;
+  const b = probe.fillStyle;
+  if (a !== b) return null; // did not resolve to a stable color
+  // a is normalized: #rrggbb or rgba(...)
+  if (a.startsWith("#")) {
+    return [parseInt(a.slice(1, 3), 16), parseInt(a.slice(3, 5), 16), parseInt(a.slice(5, 7), 16)];
+  }
+  const mm = a.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (mm) return [parseInt(mm[1], 10), parseInt(mm[2], 10), parseInt(mm[3], 10)];
+  return null;
+}
+
+function toHex(n) { return n.toString(16).padStart(2, "0"); }
+function rgbToHex(r, g, b) { return "#" + toHex(r) + toHex(g) + toHex(b); }
+function lum(r, g, b) { return 0.2126 * r + 0.7152 * g + 0.0722 * b; }
+
+function simulateColors(colors) {
+  clearError();
+  const grid = $("sim-grid");
+  grid.innerHTML = "";
+  ORDER.forEach((key) => {
+    const cfg = CVD[key];
+    const card = document.createElement("div");
+    card.className = "sim-card";
+    const title = document.createElement("h3");
+    title.textContent = cfg.label;
+    const desc = document.createElement("div");
+    desc.className = "sim-desc";
+    desc.textContent = cfg.desc;
+    const strip = document.createElement("div");
+    strip.className = "color-strip";
+    colors.forEach((col) => {
+      const [r, g, b] = applyMatrix(col.rgb[0], col.rgb[1], col.rgb[2], cfg.m);
+      const cell = document.createElement("div");
+      cell.className = "color-cell";
+      cell.style.background = `rgb(${r}, ${g}, ${b})`;
+      const label = document.createElement("span");
+      label.textContent = rgbToHex(r, g, b);
+      cell.appendChild(label);
+      strip.appendChild(cell);
+    });
+    card.appendChild(title);
+    card.appendChild(desc);
+    card.appendChild(strip);
+    grid.appendChild(card);
+  });
+  $("results").classList.add("show");
+}
+
+// ----- Mode switching -----
+let mode = "image";
+function setMode(m) {
+  mode = m;
+  $("tab-image").classList.toggle("active", m === "image");
+  $("tab-colors").classList.toggle("active", m === "colors");
+  $("image-panel").classList.toggle("hidden", m !== "image");
+  $("colors-panel").classList.toggle("hidden", m !== "colors");
+  $("results").classList.remove("show");
+  $("sim-grid").innerHTML = "";
+  clearError();
+}
+$("tab-image").addEventListener("click", () => setMode("image"));
+$("tab-colors").addEventListener("click", () => setMode("colors"));
+
+// ----- Image input wiring -----
+function handleFile(file) {
+  clearError();
+  if (!file) return;
+  if (!file.type.startsWith("image/")) { showError("That does not look like an image file."); return; }
+  const reader = new FileReader();
+  reader.onerror = () => showError("Could not read that file.");
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => simulateImage(img);
+    img.onerror = () => showError("The browser could not decode that image.");
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+const dz = $("drop-zone");
+dz.addEventListener("click", () => $("file-input").click());
+dz.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("file-input").click(); } });
+dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("drag"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("drag"));
+dz.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dz.classList.remove("drag");
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+$("file-input").addEventListener("change", (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (f) handleFile(f);
+});
+
+// ----- Color input wiring -----
+$("simulate-btn").addEventListener("click", () => {
+  const text = $("colors-input").value.trim();
+  if (!text) { showError("Enter at least one color."); $("results").classList.remove("show"); return; }
+  const colors = parseColors(text);
+  if (!colors.length) { showError("Could not parse any valid colors. Try hex like #0f5c60 or rgb(15, 92, 96)."); $("results").classList.remove("show"); return; }
+  simulateColors(colors);
+});
+$("sample-btn").addEventListener("click", () => {
+  $("colors-input").value = "#e63946\n#f1a208\n#2a9d8f\n#264653\n#8ac926\n#1982c4";
+});
+</script>
+</body>
+</html>
