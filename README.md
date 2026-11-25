@@ -55,6 +55,6 @@ MIT.
 
 ## Related
 
-- [color-contrast-checker](https://github.com/0xelitesystem/color-contrast-checker)
+- [wcag-contrast-ratio-check](https://github.com/0xelitesystem/wcag-contrast-ratio-check)
 - [color-format-converter](https://github.com/0xelitesystem/color-format-converter)
 - [color-palette-from-image](https://github.com/0xelitesystem/color-palette-from-image)
