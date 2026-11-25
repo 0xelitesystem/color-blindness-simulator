@@ -57,4 +57,4 @@ MIT.
 
 - [wcag-contrast-ratio-check](https://github.com/0xelitesystem/wcag-contrast-ratio-check)
 - [hex-rgb-hsl-hsv-converter](https://github.com/0xelitesystem/hex-rgb-hsl-hsv-converter)
-- [color-palette-from-image](https://github.com/0xelitesystem/color-palette-from-image)
+- [image-dominant-palette](https://github.com/0xelitesystem/image-dominant-palette)
