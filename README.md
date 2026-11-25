@@ -1,8 +1,8 @@
-# Color Blindness Simulator
+# Color Vision Deficiency Preview
 
 Preview how an image or a set of colors reads under common color-vision deficiencies, all in your browser. No server, no tracking, no third-party scripts.
 
-**Live demo:** https://0xelitesystem.github.io/color-blindness-simulator/
+**Live demo:** https://0xelitesystem.github.io/color-vision-deficiency-preview/
 
 ## Use
 
@@ -35,8 +35,8 @@ Everything runs in your browser. Images are read into a canvas with FileReader a
 ## Run locally
 
 ```bash
-git clone https://github.com/0xelitesystem/color-blindness-simulator
-cd color-blindness-simulator
+git clone https://github.com/0xelitesystem/color-vision-deficiency-preview
+cd color-vision-deficiency-preview
 # Open index.html in your browser, or:
 python -m http.server 8000
 ```
@@ -56,5 +56,5 @@ MIT.
 ## Related
 
 - [wcag-contrast-ratio-check](https://github.com/0xelitesystem/wcag-contrast-ratio-check)
-- [color-format-converter](https://github.com/0xelitesystem/color-format-converter)
+- [hex-rgb-hsl-hsv-converter](https://github.com/0xelitesystem/hex-rgb-hsl-hsv-converter)
 - [color-palette-from-image](https://github.com/0xelitesystem/color-palette-from-image)
